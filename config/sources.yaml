@@ -1,0 +1,228 @@
+# =============================================================================
+# REGULATORY SOURCE CONFIGURATIONS
+# =============================================================================
+# This file defines all regulatory sources that Agent 1 (Discovery & Ingestion)
+# will monitor for compliance updates.
+#
+# Schedule format: Cron expression (minute hour day month weekday)
+# Examples:
+#   "0 */6 * * *"   = Every 6 hours
+#   "0 */12 * * *"  = Every 12 hours
+#   "0 0 * * *"     = Daily at midnight
+#   "0 0 * * 1"     = Weekly on Monday
+# =============================================================================
+
+sources:
+  # ---------------------------------------------------------------------------
+  # INDIA - Priority for IBW Hackathon
+  # ---------------------------------------------------------------------------
+  
+  - id: rbi
+    name: "Reserve Bank of India"
+    country: "India"
+    url: "https://www.rbi.org.in/Scripts/NotificationUser.aspx"
+    type: html
+    schedule: "0 */6 * * *"  # Every 6 hours
+    priority: critical
+    parser: rbi_notifications
+    enabled: true
+    description: "RBI notifications and circulars on banking regulations"
+    
+  - id: sebi
+    name: "Securities and Exchange Board of India"
+    country: "India"
+    url: "https://www.sebi.gov.in/sebiweb/home/HomeAction.do?doListing=yes&sid=4&ssid=18&smid=0"
+    type: html
+    schedule: "0 */6 * * *"  # Every 6 hours
+    priority: critical
+    parser: sebi_circulars
+    enabled: true
+    description: "SEBI circulars on securities market regulations"
+    
+  - id: mof_india
+    name: "Ministry of Finance India"
+    country: "India"
+    url: "https://dea.gov.in/press-release"
+    type: html
+    schedule: "0 0 * * *"  # Daily
+    priority: medium
+    parser: generic_html
+    enabled: true
+    description: "Ministry of Finance press releases and notifications"
+    
+  - id: irdai
+    name: "Insurance Regulatory and Development Authority of India"
+    country: "India"
+    url: "https://irdai.gov.in/regulations"
+    type: html
+    schedule: "0 0 * * *"  # Daily
+    priority: medium
+    parser: generic_html
+    enabled: true
+    description: "IRDAI insurance regulations and circulars"
+    
+  # ---------------------------------------------------------------------------
+  # INTERNATIONAL - High Impact
+  # ---------------------------------------------------------------------------
+    
+  - id: gdpr
+    name: "GDPR Portal"
+    country: "European Union"
+    url: "https://irdai.gov.in"
+    type: html
+    frequency: daily
+    priority: high
+    description: "Insurance sector regulations"
+  
+  - id: pfrda
+    name: "Pension Fund Regulatory and Development Authority"
+    url: "https://pfrda.org.in"
+    type: html
+    frequency: weekly
+    priority: medium
+    description: "Pension fund regulations"
+  
+  - id: cert_in
+    name: "Indian Computer Emergency Response Team"
+    url: "https://cert-in.org.in"
+    type: html
+    frequency: daily
+    priority: high
+    description: "Cybersecurity directives and alerts"
+  
+  - id: cbdt
+    name: "Central Board of Direct Taxes"
+    url: "https://incometaxindia.gov.in"
+    type: html
+    frequency: weekly
+    priority: medium
+    description: "Tax regulations and compliance"
+
+  # ==========================================================================
+  # UNITED STATES - Critical Priority
+  # ==========================================================================
+
+  - id: sec_us
+    name: "US Securities and Exchange Commission"
+    url: "https://www.sec.gov"
+    type: html
+    frequency: every_6_hours
+    priority: critical
+    description: "US securities regulations"
+
+  - id: federal_register
+    name: "US Federal Register"
+    url: "https://www.federalregister.gov"
+    name: Securities and Exchange Board of India
+    url: https://www.sebi.gov.in/sebiweb/other/OtherAction.do?doRecent=yes
+    type: html
+    priority: critical
+    authority: securities_regulator
+    jurisdiction: India
+    sector: Securities
+    fetch_frequency: 6htion regulations"
+  
+  - id: ecb
+    name: "European Central Bank"
+    url: "https://www.ecb.europa.eu/home/html/index.en.html"
+    type: html
+    frequency: daily
+    priority: medium
+    description: "EU monetary policy and banking supervision"
+  
+  - id: esma
+    name: "European Securities and Markets Authority"
+    url: "https://www.esma.europa.eu"
+    type: html
+    frequency: daily
+    priority: medium
+    description: "EU securities markets regulation"
+
+  # ==========================================================================
+  # ASIA-PACIFIC - Medium/High Priority
+  # ==========================================================================
+
+  - id: mas_singapore
+    name: "Monetary Authority of Singapore"
+    url: "https://www.mas.gov.sg"
+    type: html
+    frequency: daily
+    priority: medium
+    description: "Singapore financial regulations"
+  
+  - id: hkma
+    name: "Hong Kong Monetary Authority"
+    url: "https://www.hkma.gov.hk"
+    type: html
+    frequency: daily
+    priority: medium
+    description: "Hong Kong banking and monetary regulations"
+  
+  - id: fsa_japan
+    name: "Financial Services Agency Japan"
+    url: "https://www.fsa.go.jp/en"
+    type: html
+    frequency: daily
+    priority: medium
+    description: "Japan financial regulations"
+
+  # ==========================================================================
+  # UK & SWITZERLAND
+  # ==========================================================================
+
+  - id: fca_uk
+    name: "Financial Conduct Authority UK"
+    schedule: "0 */6 * * *"  # Every 6 hours
+    priority: critical
+    parser: ofac_sanctions
+    enabled: true
+    description: "OFAC sanctions updates - critical for compliance"
+    
+  - id: fatf
+    name: "Financial Action Task Force"
+    country: "International"
+    url: "https://www.fatf-gafi.org/en/publications.html"
+    type: html
+    schedule: "0 0 * * 1"  # Weekly on Monday
+    priority: medium
+    parser: generic_html
+    enabled: true
+    description: "FATF guidelines on AML/CFT"
+    
+  - id: cert_in
+    name: "Indian Computer Emergency Response Team"
+    country: "India"
+    url: "https://www.cert-in.org.in/"
+    type: html
+    schedule: "0 0 * * *"  # Daily
+    priority: medium
+    parser: generic_html
+    enabled: true
+    description: "CERT-In cybersecurity advisories"
+
+# =============================================================================
+# GLOBAL SETTINGS
+# =============================================================================
+
+settings:
+  # Rate limiting
+  max_requests_per_minute: 1
+  request_timeout_seconds: 30
+  max_retries: 3
+  retry_backoff_factor: 2
+  
+  # Content limits
+  max_content_size_mb: 50
+  allowed_mime_types:
+    - "text/html"
+    - "application/pdf"
+    - "application/rss+xml"
+    - "application/xml"
+  
+  # Storage
+  ipfs_gateway: "http://localhost:5001"
+  snapshot_retention_days: 90
+  
+  # Monitoring
+  enable_telemetry: true
+  log_level: "INFO"

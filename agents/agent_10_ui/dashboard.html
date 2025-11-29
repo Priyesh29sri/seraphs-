@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seraphs 2.0 - Compliance Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            font-size: 0.875rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .obligations-list {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .list-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .list-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .obligation-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid #ecf0f1;
+            transition: background 0.2s;
+        }
+        
+        .obligation-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .obligation-item:last-child {
+            border-bottom: none;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge.critical {
+            background: #fee;
+            color: #c0392b;
+        }
+        
+        .badge.high {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge.medium {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛡️ Seraphs 2.0 - Compliance Intelligence Dashboard</h1>
+    </div>
+    
+    <div class="container">
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <h3>Sources Monitored</h3>
+                <div class="value" id="sources-count">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Obligations</h3>
+                <div class="value" id="obligations-count">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Avg Confidence</h3>
+                <div class="value" id="avg-confidence">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>Status</h3>
+                <div class="value" style="font-size: 1.5rem; color: #27ae60;">🟢 Running</div>
+            </div>
+        </div>
+        
+        <div class="obligations-list">
+            <div class="list-header">
+                <h2>Recent Obligations</h2>
+            </div>
+            <div id="obligations"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:8000/api';
+        
+        async function loadDashboard() {
+            try {
+                // Load metrics
+                const metrics = await fetch(`${API_URL}/metrics`).then(r => r.json());
+                document.getElementById('sources-count').textContent = metrics.sources_monitored;
+                document.getElementById('obligations-count').textContent = metrics.obligations_extracted;
+                document.getElementById('avg-confidence').textContent = (metrics.avg_confidence * 100).toFixed(0) + '%';
+                
+                // Load obligations
+                const obligations = await fetch(`${API_URL}/obligations`).then(r => r.json());
+                const obligationsDiv = document.getElementById('obligations');
+                
+                if (obligations.obligations && obligations.obligations.length > 0) {
+                    obligationsDiv.innerHTML = obligations.obligations.map(obl => {
+                        const severityClass = (obl.severity || 'medium').toLowerCase();
+                        return `
+                            <div class="obligation-item">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                    <div style="flex: 1;">
+                                        <strong>${obl.text || 'No text'}</strong>
+                                    </div>
+                                    <span class="badge ${severityClass}">${obl.severity || 'MEDIUM'}</span>
+                                </div>
+                                <div style="color: #7f8c8d; font-size: 0.875rem;">
+                                    Type: ${obl.type} | Confidence: ${(obl.confidence * 100).toFixed(0)}% | Verdict: ${obl.verdict}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    obligationsDiv.innerHTML = '<div class="loading">No obligations yet. Run tests to generate data.</div>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('obligations').innerHTML = 
+                    '<div class="loading" style="color: #c0392b;">Error: API not running. Start with: python agents/agent_10_ui/api.py</div>';
+            }
+        }
+        
+        // Load dashboard on page load
+        loadDashboard();
+        
+        // Refresh every 30 seconds
+        setInterval(loadDashboard, 30000);
+</script>
+</body>
+</html>
