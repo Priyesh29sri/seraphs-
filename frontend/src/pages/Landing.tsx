@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { SplineScene } from '../components/ui/splite';
+import { lazy, Suspense } from 'react';
 import { ButtonColorful } from '../components/ui/button-colorful';
 import { Card } from '../components/ui/card';
+
+const SplineScene = lazy(() => import('../components/ui/splite').then(module => ({ default: module.SplineScene })));
 
 const ROBOT_SCENE_URL = "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode";
 
@@ -105,10 +107,19 @@ export const Landing = () => {
                         transition={{ duration: 1, delay: 0.5 }}
                         className="flex-1 relative"
                     >
-                        <SplineScene
-                            scene={ROBOT_SCENE_URL}
-                            className="w-full h-full"
-                        />
+                        <Suspense fallback={
+                            <div className="w-full h-full flex items-center justify-center">
+                                <div className="text-center">
+                                    <div className="text-9xl mb-4 animate-pulse">🤖</div>
+                                    <p className="text-gray-400 text-xl">Loading...</p>
+                                </div>
+                            </div>
+                        }>
+                            <SplineScene
+                                scene={ROBOT_SCENE_URL}
+                                className="w-full h-full"
+                            />
+                        </Suspense>
                     </motion.div>
                 </div>
             </Card>
