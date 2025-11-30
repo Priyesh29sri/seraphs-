@@ -13,8 +13,8 @@ Seraphs 2.0 is a distributed, multi-agent system that automatically monitors glo
 How to Set Up and Run Seraphs
 
 1. Clone the repository and enter the project folder
-git clone <your-repo-url> seraphs_3.0
-cd seraphs_3.0
+git clone <your-repo-url> seraphs
+cd seraphs
 
 2. Create and activate a Python virtual environment
 python -m venv venv
